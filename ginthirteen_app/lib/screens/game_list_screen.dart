@@ -3,6 +3,7 @@ import 'package:ginthirteen_app/data/dbhelper.dart';
 import 'package:ginthirteen_app/model/game.dart';
 import 'package:ginthirteen_app/model/player.dart';
 import 'package:ginthirteen_app/screens/create_game_screen.dart';
+import 'package:ginthirteen_app/screens/scoreboard_screen.dart';
 
 class GameListScreen extends StatefulWidget {
   @override
@@ -45,7 +46,7 @@ class GameListState extends State {
             subtitle: Text(this.games[position].gameWinnerTag),
             onTap: () {
               debugPrint("Tapped on " + this.games[position].name);
-              //_navigateToDetail(this.games[position]);
+              _navigateToDetail(this.games[position]);
             },
             leading: CircleAvatar(
                 backgroundColor: Colors.blue,
@@ -76,7 +77,13 @@ class GameListState extends State {
     });
   }
 
-  _navigateToDetail(Game gm) {}
+  _navigateToDetail(Game gm) async {
+    bool result = await Navigator.push(
+        context, MaterialPageRoute(builder: (context) => ScoreboardScreen(gm)));
+    if (result == true) {
+      getData();
+    }
+  }
 
   _navigateToCreateGame(Game gm) async {
     bool result = await Navigator.push(

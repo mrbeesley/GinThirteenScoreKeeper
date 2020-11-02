@@ -122,7 +122,7 @@ class PlayerDetailState extends State {
       case mnuSave:
         save();
         break;
-      case mnuSave:
+      case mnuDelete:
         Navigator.pop(context, true);
         if (player.id == null) {
           return;

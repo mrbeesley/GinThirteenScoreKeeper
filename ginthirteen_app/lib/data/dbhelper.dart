@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:ginthirteen_app/model/data_model.dart';
 import 'package:ginthirteen_app/model/game.dart';
 import 'package:ginthirteen_app/model/game_mock.dart';
@@ -7,9 +6,9 @@ import 'package:intl/intl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 import 'package:path_provider/path_provider.dart';
 import 'package:ginthirteen_app/model/player.dart';
+import 'package:ginthirteen_app/model/score_model.dart';
 
 class DbHelper {
   // Use a singleton pattern, you only want one instance of this
@@ -19,11 +18,10 @@ class DbHelper {
     return _dbHelper;
   }
 
-  // PLayer table properties
+  // Table names
   String tblPlayers = 'players';
   String tblGame = 'games';
-
-  // Game table properties
+  String tblScores = 'scores';
 
   // db instance
   static Database _db;
@@ -52,8 +50,8 @@ class DbHelper {
         "${PlayerFields.totalWins} int, " +
         "${PlayerFields.gamesPlayed} int, " +
         "${PlayerFields.winPercent} int, " +
-        "${PlayerFields.winStreak} int, " +
-        "${PlayerFields.scoreHistory} TEXT)");
+        "${PlayerFields.winStreak} int)");
+
     await db.execute("CREATE TABLE $tblGame(" +
         "${GameFields.id} INTEGER PRIMARY KEY, " +
         "${GameFields.name} TEXT, " +
@@ -63,6 +61,16 @@ class DbHelper {
         "${GameFields.gameWinnerTag} TEXT, " +
         "${GameFields.gameWinnerId} int, " +
         "${GameFields.players} TEXT)");
+
+    await db.execute("CREATE TABLE $tblScores("
+        "${ScoreModelFields.id} INTEGER PRIMARY KEY, " +
+        "${ScoreModelFields.gameId} int, " +
+        "${ScoreModelFields.playerId} int, " +
+        "${ScoreModelFields.round} int, " +
+        "${ScoreModelFields.score} int, " +
+        "${ScoreModelFields.runningScore} int)");
+
+    // This is just for testing and needs to be removed for release
     await _seedMockPlayerData(db);
     await _seedGameData(db);
   }
@@ -92,6 +100,28 @@ class DbHelper {
     var result = await _getData(tblGame, GameFields.id);
 
     result.forEach((p) => ret.add(Game.fromObject(p)));
+    return ret;
+  }
+
+  Future<List<ScoreModel>> getScoresForGame(int gameId) async {
+    List<ScoreModel> ret = List<ScoreModel>();
+    Database db = await this.db;
+    var result = await db.rawQuery("SELECT * FROM $tblScores " + 
+        "WHERE ${ScoreModelFields.gameId} = $gameId " +
+        "ORDER BY ${ScoreModelFields.round} ASC, ${ScoreModelFields.runningScore} DESC");
+
+    result.forEach((p) => ret.add(ScoreModel.fromObject(p)));
+    return ret;
+  }
+
+  Future<List<ScoreModel>> getScoresForPlayer(int gameId, int playerId) async {
+    List<ScoreModel> ret = List<ScoreModel>();
+    Database db = await this.db;
+    var result = await db.rawQuery("SELECT * FROM $tblScores " + 
+        "WHERE ${ScoreModelFields.gameId} = $gameId AND ${ScoreModelFields.playerId} = $playerId " +
+        "ORDER BY ${ScoreModelFields.round} ASC, ${ScoreModelFields.runningScore} DESC");
+
+    result.forEach((p) => ret.add(ScoreModel.fromObject(p)));
     return ret;
   }
 

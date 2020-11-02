@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:ginthirteen_app/model/data_model.dart';
+import 'package:ginthirteen_app/model/game_stats.dart';
 
 class Player implements DataModel {
   int id;
@@ -13,7 +12,6 @@ class Player implements DataModel {
   int gamesPlayed;
   int winPercent;
   int winStreak;
-  List<int> scoreHistory = List<int>();
 
   // Constructor
   Player(this.firstName, this.lastName, this.gameTag, this.avgScore,
@@ -40,19 +38,10 @@ class Player implements DataModel {
     this.gamesPlayed = o[PlayerFields.gamesPlayed] ?? 0;
     this.winPercent = o[PlayerFields.winPercent] ?? 0;
     this.winStreak = o[PlayerFields.winStreak] ?? 0;
-    this.scoreHistory = List<int>.from(jsonDecode(o[PlayerFields.scoreHistory]));
   }
 
   // Getters
   String get fullName => '$firstName $lastName';
-  int get currentScore => scoreHistory?.fold(0, (prev, cur) => prev + cur);
-
-  void addScore(int val) {
-    if (scoreHistory == null) {
-      scoreHistory = new List<int>();
-    }
-    scoreHistory.add(val);
-  }
 
   // Utility Method to make it easier to save
   Map<String, dynamic> toMap() {
@@ -66,11 +55,18 @@ class Player implements DataModel {
     map[PlayerFields.gamesPlayed] = gamesPlayed;
     map[PlayerFields.winPercent] = winPercent;
     map[PlayerFields.winStreak] = winStreak;
-    map[PlayerFields.scoreHistory] = jsonEncode(scoreHistory);
     if (id != null) {
       map[PlayerFields.id] = id;
     }
     return map;
+  }
+
+  void updateStats(GameStats stats) {
+    this.avgScore = stats.avgScore;
+    this.totalWins = stats.totalWins;
+    this.gamesPlayed = stats.gamesPlayed;
+    this.winPercent = stats.winPercent;
+    this.winStreak = stats.winStreak;
   }
 }
 
@@ -85,5 +81,4 @@ class PlayerFields {
   static const gamesPlayed = 'gamesPlayed';
   static const winPercent = 'winPercent';
   static const winStreak = 'winStreak';
-  static const scoreHistory = 'scoreHistory';
 }
