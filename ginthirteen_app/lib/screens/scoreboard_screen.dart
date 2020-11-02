@@ -10,7 +10,7 @@ import 'package:ginthirteen_app/model/score_model.dart';
 import 'package:intl/intl.dart';
 
 class ScoreboardScreen extends StatefulWidget {
-  Game gm;
+  final Game gm;
   ScoreboardScreen(this.gm);
 
   @override
@@ -196,13 +196,15 @@ class ScoreboardState extends State {
 
   void _moveToNextRound() {
     bool hasScores = players.every((p) => p.hasScoreForRound(gm.currentRound));
-    bool isLastRound = gm.currentRound == 13;
+    bool isLastRound = gm.currentRound >= 13;
     if (hasScores) {
       gm.currentRound++;
       helper.updateData(gm, helper.tblGame, GameFields.id, gm.id);
       if (isLastRound) {
+        print('Finishing Game');
         _finishGame();
       } else {
+        print('Continuing to next round');
         _getPlayerScoreData();
       }
     } else {

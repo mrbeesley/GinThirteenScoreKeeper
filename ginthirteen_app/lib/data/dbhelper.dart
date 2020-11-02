@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 import 'package:ginthirteen_app/model/player.dart';
 import 'package:ginthirteen_app/model/score_model.dart';
 
@@ -34,7 +35,7 @@ class DbHelper {
 
   Future<Database> initializeDb() async {
     Directory dir = await getApplicationDocumentsDirectory();
-    String path = dir.path + "ginthirteen.db";
+    String path = p.join(dir.path + "/ginthirteen.db");
     var dbGin = await openDatabase(path, version: 1, onCreate: _createDb);
     return dbGin;
   }
@@ -63,7 +64,7 @@ class DbHelper {
         "${GameFields.players} TEXT)");
 
     await db.execute("CREATE TABLE $tblScores("
-        "${ScoreModelFields.id} INTEGER PRIMARY KEY, " +
+            "${ScoreModelFields.id} INTEGER PRIMARY KEY, " +
         "${ScoreModelFields.gameId} int, " +
         "${ScoreModelFields.playerId} int, " +
         "${ScoreModelFields.round} int, " +
@@ -106,7 +107,7 @@ class DbHelper {
   Future<List<ScoreModel>> getScoresForGame(int gameId) async {
     List<ScoreModel> ret = List<ScoreModel>();
     Database db = await this.db;
-    var result = await db.rawQuery("SELECT * FROM $tblScores " + 
+    var result = await db.rawQuery("SELECT * FROM $tblScores " +
         "WHERE ${ScoreModelFields.gameId} = $gameId " +
         "ORDER BY ${ScoreModelFields.round} ASC, ${ScoreModelFields.runningScore} DESC");
 
@@ -117,7 +118,7 @@ class DbHelper {
   Future<List<ScoreModel>> getScoresForPlayer(int gameId, int playerId) async {
     List<ScoreModel> ret = List<ScoreModel>();
     Database db = await this.db;
-    var result = await db.rawQuery("SELECT * FROM $tblScores " + 
+    var result = await db.rawQuery("SELECT * FROM $tblScores " +
         "WHERE ${ScoreModelFields.gameId} = $gameId AND ${ScoreModelFields.playerId} = $playerId " +
         "ORDER BY ${ScoreModelFields.round} ASC, ${ScoreModelFields.runningScore} DESC");
 
